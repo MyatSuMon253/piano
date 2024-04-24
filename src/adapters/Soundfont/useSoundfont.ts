@@ -1,9 +1,8 @@
-import React, { useRef, useState } from "react";
-import { Optional } from "../domain/types";
-import { InstrumentName, Player } from "soundfont-player";
-import { MidiValue } from "../domain/note";
-import { AudioNodesRegistry, DEFAULT_INSTRUMENT } from "../domain/sound";
-import { useAudioContext } from "../components/AudioContextProvider";
+import { useRef, useState } from "react";
+import Soundfont, { InstrumentName, Player } from "soundfont-player";
+import { MidiValue } from "../../domain/note";
+import { AudioNodesRegistry, DEFAULT_INSTRUMENT } from "../../domain/sound";
+import { Optional } from "../../domain/types";
 
 type Settings = {
   AudioContext: AudioContextType;
@@ -12,32 +11,32 @@ type Settings = {
 interface Adapted {
   loading: boolean;
   current: Optional<InstrumentName>;
+
   load(instrument?: InstrumentName): Promise<void>;
   play(note: MidiValue): Promise<void>;
   stop(note: MidiValue): Promise<void>;
 }
 
-export const useSoundfont = ({ AudioContext }: Settings) => {
+export function useSoundfont({ AudioContext }: Settings): Adapted {
   let activeNodes: AudioNodesRegistry = {};
   const [current, setCurrent] = useState<Optional<InstrumentName>>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [player, setPlayer] = useState<Optional<Player>>(null);
-
-  const audio = useRef(new useAudioContext());
-
-  async function load(instrument: InstrumentName = DEFAULT_INSTRUMENT) {
-    setLoading(true);
-    const player = await Soundfont.instrument(audio.current, instrument);
-    setLoading(false);
-    setCurrent(instrument);
-
-    setPlayer(player);
-  }
+  const audio = useRef(new AudioContext());
 
   async function resume() {
     return audio.current.state === "suspended"
       ? await audio.current.resume()
       : Promise.resolve();
+  }
+
+  async function load(instrument: InstrumentName = DEFAULT_INSTRUMENT) {
+    setLoading(true);
+    const player = await Soundfont.instrument(audio.current, instrument);
+
+    setLoading(false);
+    setCurrent(instrument);
+    setPlayer(player);
   }
 
   async function play(note: MidiValue) {
@@ -63,4 +62,4 @@ export const useSoundfont = ({ AudioContext }: Settings) => {
     play,
     stop,
   };
-};
+}
