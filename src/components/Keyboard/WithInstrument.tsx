@@ -1,10 +1,10 @@
-import { useSoundfont } from "../../adapters";
-import { useMount } from "../../utils/useMount/useMount";
 import { useAudioContext } from "../AudioContextProvider";
-import { Keyboard } from "./Keyboard";
+import { useSoundfont } from "../../adapters/Soundfont";
+import { useMount } from "../../utils/useMount";
+import { Keyboard } from "../Keyboard";
 
 export const KeyboardWithInstrument = () => {
-  const AudioContext = useAudioContext();
+  const AudioContext = useAudioContext()!;
   const { loading, play, stop, load } = useSoundfont({ AudioContext });
 
   useMount(() => load());
